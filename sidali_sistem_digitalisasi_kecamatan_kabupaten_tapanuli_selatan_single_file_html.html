@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SIDALI — Sistem Digitalisasi Kecamatan Kabupaten Tapanuli Selatan</title>
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --emas:#D4AF37; /* gold */
+      --hijau:#1e7f4f; /* Tapsel green */
+      --hijau-muda:#e9f7f0;
+    }
+    html,body{font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol'}
+    .glass{backdrop-filter: blur(8px); background: rgba(255,255,255,0.7)}
+    .ring-emas{box-shadow: 0 0 0 1px rgba(212,175,55,.35),0 10px 25px rgba(0,0,0,.06)}
+    .tab-btn[aria-selected="true"]{background: var(--hijau); color:#fff;}
+    .badge{font-size:.75rem; padding:.25rem .5rem; border-radius:.5rem;}
+    .badge.wait{background:#fff7e6; color:#b76e00; border:1px solid #ffdda1}
+    .badge.ok{background:#e8fff3; color:#0f7b4d; border:1px solid #baf2d6}
+    .badge.err{background:#fff0f0; color:#b80f0f; border:1px solid #ffc9c9}
+    .card{background:#fff; border-radius:1rem; box-shadow: 0 10px 30px rgba(0,0,0,.06); border:1px solid rgba(0,0,0,.05)}
+    .section-title h2{font-weight:600}
+    .section-title .sub{color:#4b5563}
+    .input, .select, .textarea{width:100%; border:1px solid #e5e7eb; border-radius:.75rem; padding:.7rem .9rem}
+    .input:focus,.select:focus,.textarea:focus{outline:2px solid var(--hijau); outline-offset:2px; border-color: var(--hijau)}
+    .btn{display:inline-flex; gap:.5rem; align-items:center; border-radius:.8rem; padding:.7rem 1rem; font-weight:600}
+    .btn-primary{background:var(--hijau); color:#fff}
+    .btn-ghost{background:#fff; border:1px solid #e5e7eb; color:#111827}
+    .btn-ghost:hover{border-color:#cbd5e1}
+    .kpi{border-left:4px solid var(--emas)}
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-white via-emerald-50/40 to-white">
+  <!-- Top bar -->
+  <header class="sticky top-0 z-50 backdrop-blur border-b border-emerald-900/5 bg-white/70">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- Logo from Google Drive; replace with local /assets/logo.png if available -->
+        <img class="w-12 h-12 rounded-xl ring-1 ring-emas" style="object-fit:cover" alt="Logo SIDALI"
+             src="https://drive.google.com/uc?export=view&id=1i-sqU2J_9DfJhAfKInka-i0FS89rFS98" />
+        <div>
+          <h1 class="text-xl md:text-2xl font-semibold tracking-tight text-emerald-900">SIDALI <span class="text-[var(--emas)]">—</span> SISTEM DIGITALISASI KECAMATAN KABUPATEN TAPANULI SELATAN</h1>
+          <p class="text-xs md:text-sm text-emerald-900/70 -mt-1">Putih • Emas • Hijau — Khas Tapanuli Selatan</p>
+        </div>
+      </div>
+      <a class="hidden md:inline-flex btn btn-ghost" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <i data-lucide="arrow-up"></i> Ke Atas
+      </a>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <main class="max-w-7xl mx-auto px-4 pt-6 pb-24">
+    <div class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-2">
+      <button class="tab-btn btn btn-ghost" data-tab="tab-deskripsi" aria-selected="true"><i data-lucide="map"></i> Deskripsi Wilayah</button>
+      <button class="tab-btn btn btn-ghost" data-tab="tab-kegiatan"><i data-lucide="clipboard-list"></i> Kegiatan Kecamatan</button>
+      <button class="tab-btn btn btn-ghost" data-tab="tab-pengumuman"><i data-lucide="megaphone"></i> Pengumuman</button>
+      <button class="tab-btn btn btn-ghost" data-tab="tab-data"><i data-lucide="table"></i> Data Camat, Lurah & Kepling</button>
+    </div>
+
+    <!-- TAB: DESKRIPSI WILAYAH -->
+    <section id="tab-deskripsi" class="space-y-6">
+      <div class="grid md:grid-cols-3 gap-4">
+        <!-- KPI Cards -->
+        <div class="card p-5 kpi">
+          <div class="text-sm text-emerald-900/60">Luas Wilayah</div>
+          <div class="text-3xl font-semibold text-emerald-900"><span id="kpiLuas"><span class="opacity-50">—</span></span> <span class="text-base font-medium">km²</span></div>
+          <div class="text-xs text-slate-500 mt-1">Sumber: Kab. Tapanuli Selatan</div>
+        </div>
+        <div class="card p-5 kpi">
+          <div class="text-sm text-emerald-900/60">Jumlah Penduduk</div>
+          <div class="text-3xl font-semibold text-emerald-900" id="kpiPenduduk"><span class="opacity-50">—</span></div>
+          <div class="text-xs text-slate-500 mt-1">Estimasi per tahun berjalan</div>
+        </div>
+        <div class="card p-5 kpi">
+          <div class="text-sm text-emerald-900/60">Kecamatan & Kelurahan</div>
+          <div class="flex items-end gap-6 mt-1">
+            <div>
+              <div class="text-3xl font-semibold text-emerald-900" id="kpiKecamatan"><span class="opacity-50">—</span></div>
+              <div class="text-xs text-slate-500">Kecamatan</div>
+            </div>
+            <div>
+              <div class="text-3xl font-semibold text-emerald-900" id="kpiKelurahan"><span class="opacity-50">—</span></div>
+              <div class="text-xs text-slate-500">Kelurahan</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-5 gap-4">
+        <div class="card p-5 md:col-span-3">
+          <div class="section-title mb-3 flex items-center justify-between">
+            <h2 class="text-lg">Infografis Kabupaten</h2>
+            <span class="text-xs sub">Grafik dapat diedit via data di bawah</span>
+          </div>
+          <canvas id="chartPenduduk"></canvas>
+        </div>
+        <div class="card p-5 md:col-span-2">
+          <div class="section-title mb-3"><h2 class="text-lg">Ringkasan Wilayah</h2></div>
+          <table class="w-full text-sm">
+            <tbody id="tabelRingkas" class="[&_td]:py-2 [&_td]:align-top [&_td:first-child]:text-slate-500">
+              <!-- diisi via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: KEGIATAN -->
+    <section id="tab-kegiatan" class="space-y-6 hidden">
+      <div class="section-title flex items-center justify-between">
+        <h2 class="text-xl font-semibold">Unggah Kegiatan Kecamatan</h2>
+        <div id="statusBadge" class="badge wait">Status: Menunggu</div>
+      </div>
+      <div class="grid md:grid-cols-7 gap-4">
+        <div class="card p-5 md:col-span-4">
+          <form id="formKegiatan" class="space-y-4">
+            <div>
+              <label class="block text-sm mb-1">Nama Penanggung Jawab</label>
+              <input id="fNama" class="input" placeholder="Nama lengkap" required />
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm mb-1">Tanggal</label>
+                <input id="fTanggal" type="date" class="input" required />
+              </div>
+              <div>
+                <label class="block text-sm mb-1">Kecamatan</label>
+                <input id="fKec" class="input" placeholder="Contoh: Batang Toru" required />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">Deskripsi</label>
+              <textarea id="fDesk" class="textarea" rows="4" placeholder="Uraian singkat kegiatan" required></textarea>
+            </div>
+            <div>
+              <label class="block text-sm mb-1">Lampiran Bukti (foto/pdf)</label>
+              <input id="fLampiran" type="file" class="input" accept="image/*,application/pdf" />
+              <p class="text-xs text-slate-500 mt-1">Opsional. Jika diunggah, berkas akan disimpan ke Google Drive master.</p>
+            </div>
+            <div class="flex items-center gap-3 pt-2">
+              <button class="btn btn-primary" type="submit"><i data-lucide="upload"></i> Kirim Kegiatan</button>
+              <button class="btn btn-ghost" type="reset"><i data-lucide="rotate-ccw"></i> Reset</button>
+            </div>
+          </form>
+        </div>
+        <div class="card p-5 md:col-span-3">
+          <h3 class="font-semibold mb-2">Panduan Singkat</h3>
+          <ol class="list-decimal pl-5 text-sm space-y-2 text-slate-700">
+            <li>Isi semua kolom dengan benar.</li>
+            <li>Jika ada <em>Lampiran Bukti</em>, pilih file untuk diunggah.</li>
+            <li>Tekan <strong>Kirim Kegiatan</strong>; status akan berubah ketika sukses.</li>
+            <li>Hasil unggahan otomatis masuk ke Sheet <em>SIDALI_Kegiatan</em> dan tampil di tab <strong>Pengumuman</strong>.</li>
+          </ol>
+          <div class="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm">
+            <div class="font-medium mb-1">Catatan Integrasi</div>
+            Endpoint Google Apps Script perlu diisi pada variabel <code>CONFIG.GAS_ENDPOINT</code> di bawah.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: PENGUMUMAN -->
+    <section id="tab-pengumuman" class="space-y-4 hidden">
+      <div class="section-title">
+        <h2 class="text-xl font-semibold">Pengumuman Kegiatan Terkini</h2>
+        <p class="sub text-sm">Sumber data: spreadsheet hasil unggahan Form Kegiatan</p>
+      </div>
+
+      <!-- Mode 1: Tabel dinamis dari CSV publik (jika sheet dipublish) -->
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold">Daftar Pengumuman</h3>
+          <button id="btnRefreshPengumuman" class="btn btn-ghost text-sm"><i data-lucide="refresh-ccw"></i> Muat Ulang</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm" id="tblPengumuman">
+            <thead>
+              <tr class="text-left border-b">
+                <th class="py-2 pr-3">Tanggal</th>
+                <th class="py-2 pr-3">Kecamatan</th>
+                <th class="py-2 pr-3">Penanggung Jawab</th>
+                <th class="py-2 pr-3">Deskripsi</th>
+                <th class="py-2">Lampiran</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="pengumumanInfo" class="text-xs text-slate-500 mt-2"></div>
+      </div>
+
+      <!-- Mode 2: Embed tampilan Sheet (fallback) -->
+      <div class="card p-2">
+        <iframe id="embedPengumuman" class="w-full h-[560px] rounded-xl" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </section>
+
+    <!-- TAB: DATA CAMAT/LURAH/KEPLING -->
+    <section id="tab-data" class="space-y-4 hidden">
+      <div class="section-title">
+        <h2 class="text-xl font-semibold">Data Camat, Lurah & Kepling</h2>
+        <p class="sub text-sm">Sumber: Spreadsheet master</p>
+      </div>
+      <div class="card p-2">
+        <iframe class="w-full h-[680px] rounded-xl" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          src="https://docs.google.com/spreadsheets/d/1m3jITIs6dLgWQBrLwt-uKWHbGR8O88s1RNzmGQVwwJo/preview?rm=minimal#gid=0"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-emerald-900/5 py-8">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-slate-600">
+      <div>© <span id="yearNow"></span> Pemerintah Kabupaten Tapanuli Selatan · SIDALI</div>
+      <div class="flex items-center gap-2"><i data-lucide="shield"></i> Integritas · Akuntabel · BerAKHLAK</div>
+    </div>
+  </footer>
+
+<script>
+  // ======================
+  // KONFIGURASI UMUM
+  // ======================
+  const CONFIG = {
+    // 1) Endpoint Google Apps Script (Web App) untuk menerima POST multipart/form-data
+    //    Ganti dengan URL Web App Anda setelah dideploy (lihat petunjuk di bawah)
+    GAS_ENDPOINT: 'https://script.google.com/macros/s/PASTE-WEBAPP-URL/exec',
+
+    // 2) Sheet Pengumuman (hasil unggahan) dalam format CSV yang dipublish to web:
+    //    File -> Share -> Publish to web -> pilih sheet/CSV -> salin URL CSV ke sini.
+    //    Jika belum dipublish, tabel akan kosong namun embed tetap berfungsi sebagai fallback.
+    SHEET_CSV_URL: 'https://docs.google.com/spreadsheets/d/1e0ObTh7qr7DKTwFsAfRYeNRJ9qkDkZ1Lhg1CEusnwEo/export?format=csv&gid=0',
+
+    // 3) URL embed Sheet Pengumuman (tetap berfungsi tanpa CSV). Pakai link yang Anda berikan.
+    PENGUMUMAN_EMBED_URL: 'https://docs.google.com/spreadsheets/d/1e0ObTh7qr7DKTwFsAfRYeNRJ9qkDkZ1Lhg1CEusnwEo/preview',
+
+    // 4) Data Deskripsi Wilayah (placeholder — silakan sesuaikan)
+    DESKRIPSI: {
+      luas_km2: 6030.47,
+      penduduk: 310000,
+      kecamatan: 15,
+      kelurahan: 38,
+      catatan: 'Angka indikatif — mohon sesuaikan dengan data resmi BPS/Daerah.'
+    },
+
+    // 5) Data grafik penduduk (contoh; bisa diganti dari Sheet/API)
+    GRAFIK_PENDUDUK: {
+      labels: ['2019','2020','2021','2022','2023','2024'],
+      values: [298000, 302000, 305500, 307800, 309200, 310000]
+    }
+  }
+
+  // ======================
+  // UI & UTIL
+  // ======================
+  const $ = (sel, ctx=document) => ctx.querySelector(sel)
+  const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel))
+
+  function setBadge(status, text){
+    const el = $('#statusBadge')
+    if(!el) return
+    el.className = 'badge ' + (status==='ok'?'ok': status==='err'?'err':'wait')
+    el.textContent = `Status: ${text}`
+  }
+
+  // Tabs
+  $$('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const target = btn.dataset.tab
+      $$('.tab-btn').forEach(b=>b.setAttribute('aria-selected','false'))
+      btn.setAttribute('aria-selected','true')
+      $$('main section').forEach(sec=>sec.classList.add('hidden'))
+      $('#' + target).classList.remove('hidden')
+      window.scrollTo({top:0,behavior:'smooth'})
+    })
+  })
+
+  // Tahun footer
+  $('#yearNow').textContent = new Date().getFullYear()
+
+  // Icon init
+  lucide.createIcons()
+
+  // ======================
+  // DESKRIPSI WILAYAH
+  // ======================
+  function fmtNum(x){
+    return x?.toLocaleString('id-ID')
+  }
+
+  function renderRingkas(){
+    const d = CONFIG.DESKRIPSI
+    $('#kpiLuas').textContent = d.luas_km2
+    $('#kpiPenduduk').textContent = fmtNum(d.penduduk)
+    $('#kpiKecamatan').textContent = d.kecamatan
+    $('#kpiKelurahan').textContent = d.kelurahan
+
+    const rows = [
+      ['Nama Daerah','Kabupaten Tapanuli Selatan'],
+      ['Luas Wilayah', `${d.luas_km2} km²`],
+      ['Penduduk (estimasi)', fmtNum(d.penduduk)],
+      ['Jumlah Kecamatan', d.kecamatan],
+      ['Jumlah Kelurahan', d.kelurahan],
+      ['Catatan', d.catatan]
+    ]
+    const tbody = $('#tabelRingkas')
+    tbody.innerHTML = rows.map(r=>`<tr><td class="pr-4">${r[0]}</td><td>${r[1]}</td></tr>`).join('')
+  }
+
+  function renderChart(){
+    const ctx = document.getElementById('chartPenduduk').getContext('2d')
+    const data = CONFIG.GRAFIK_PENDUDUK
+    new Chart(ctx,{
+      type:'line',
+      data:{
+        labels:data.labels,
+        datasets:[{
+          label:'Jumlah Penduduk',
+          data:data.values,
+          tension:.35,
+          borderWidth:2,
+          pointRadius:3
+        }]
+      },
+      options:{
+        plugins:{legend:{display:false}},
+        scales:{
+          y:{ticks:{callback:(v)=> v.toLocaleString('id-ID')}}
+        }
+      }
+    })
+  }
+
+  // ======================
+  // FORM KEGIATAN -> Google Apps Script
+  // ======================
+  $('#formKegiatan')?.addEventListener('submit', async (e)=>{
+    e.preventDefault()
+    setBadge('wait','Mengirim...')
+
+    try{
+      const nama = $('#fNama').value.trim()
+      const tgl  = $('#fTanggal').value
+      const kec  = $('#fKec').value.trim()
+      const desk = $('#fDesk').value.trim()
+      const file = $('#fLampiran').files[0]
+
+      if(!nama || !tgl || !kec || !desk){
+        setBadge('err','Lengkapi semua kolom wajib')
+        return
+      }
+      if(!CONFIG.GAS_ENDPOINT || CONFIG.GAS_ENDPOINT.includes('PASTE-WEBAPP-URL')){
+        setBadge('err','Endpoint Apps Script belum diisi')
+        alert('Silakan isi CONFIG.GAS_ENDPOINT dengan URL Web App Google Apps Script Anda.')
+        return
+      }
+
+      const fd = new FormData()
+      fd.append('nama', nama)
+      fd.append('tanggal', tgl)
+      fd.append('kecamatan', kec)
+      fd.append('deskripsi', desk)
+      if(file) fd.append('lampiran', file, file.name)
+
+      const res = await fetch(CONFIG.GAS_ENDPOINT, { method:'POST', body: fd })
+      const json = await res.json().catch(()=>({ok:false,message:'Respon bukan JSON'}))
+
+      if(res.ok && json.ok){
+        setBadge('ok','Terkirim')
+        e.target.reset()
+        // coba refresh pengumuman jika CSV diaktifkan
+        loadPengumuman()
+      } else {
+        setBadge('err', json.message || 'Gagal mengirim')
+        console.error('GAS error:', json)
+      }
+    }catch(err){
+      console.error(err)
+      setBadge('err','Terjadi kesalahan jaringan')
+    }
+  })
+
+  // ======================
+  // PENGUMUMAN: CSV (opsional) + IFRAME (fallback)
+  // ======================
+  async function loadCSV(url){
+    const res = await fetch(url)
+    if(!res.ok) throw new Error('Gagal memuat CSV')
+    return await res.text()
+  }
+
+  function parseCSV(text){
+    // sederhana: split baris & koma, tangani kutip ganda
+    const rows = []
+    let i=0, field='', row=[], inQ=false
+    const pushField=()=>{row.push(field); field=''}
+    const pushRow=()=>{rows.push(row); row=[]}
+    while(i<text.length){
+      const c = text[i]
+      if(inQ){
+        if(c==='"' && text[i+1]==='"'){ field+='"'; i+=2; continue }
+        if(c==='"'){ inQ=false; i++; continue }
+        field+=c; i++; continue
+      }else{
+        if(c==='"'){ inQ=true; i++; continue }
+        if(c===','){ pushField(); i++; continue }
+        if(c==='\n' || c==='\r'){ if(field!==''||row.length){ pushField(); pushRow() } i++; continue }
+        field+=c; i++; continue
+      }
+    }
+    if(field!==''||row.length){ pushField(); pushRow() }
+    return rows
+  }
+
+  async function loadPengumuman(){
+    const info = $('#pengumumanInfo')
+    const tbody = $('#tblPengumuman tbody')
+    tbody.innerHTML = ''
+
+    const csvUrl = CONFIG.SHEET_CSV_URL?.trim()
+    if(csvUrl){
+      try{
+        const text = await loadCSV(csvUrl)
+        const rows = parseCSV(text)
+        // Asumsi header: Tanggal, Kecamatan, Penanggung Jawab, Deskripsi, LinkLampiran
+        const [header, ...data] = rows
+        const idx = {
+          tanggal: header.findIndex(h=>/tgl|tanggal/i.test(h)),
+          kec: header.findIndex(h=>/kec/i.test(h)),
+          pj: header.findIndex(h=>/penanggung|pj/i.test(h)),
+          desk: header.findIndex(h=>/desk/i.test(h)),
+          lamp: header.findIndex(h=>/lamp|link|bukti/i.test(h))
+        }
+        data.filter(r=>r.length>0).forEach(r=>{
+          const link = r[idx.lamp] ? `<a class="text-emerald-700 underline" href="${r[idx.lamp]}" target="_blank" rel="noopener">Lihat</a>` : '-'
+          const tr = `<tr class="border-b last:border-0">
+            <td class="py-2 pr-3 whitespace-nowrap">${r[idx.tanggal]||''}</td>
+            <td class="py-2 pr-3 whitespace-nowrap">${r[idx.kec]||''}</td>
+            <td class="py-2 pr-3">${r[idx.pj]||''}</td>
+            <td class="py-2 pr-3">${r[idx.desk]||''}</td>
+            <td class="py-2">${link}</td>
+          </tr>`
+          tbody.insertAdjacentHTML('beforeend', tr)
+        })
+        info.textContent = 'Mode: CSV publik (otomatis menyegarkan ketika tombol “Muat Ulang” ditekan).'
+      }catch(err){
+        console.warn('CSV gagal dimuat, gunakan embed saja.', err)
+        info.textContent = 'CSV tidak tersedia. Menampilkan embed Sheet sebagai alternatif.'
+      }
+    }else{
+      info.textContent = 'CSV belum dikonfigurasi. Menampilkan embed Sheet sebagai alternatif.'
+    }
+  }
+
+  $('#btnRefreshPengumuman')?.addEventListener('click', loadPengumuman)
+  $('#embedPengumuman').src = CONFIG.PENGUMUMAN_EMBED_URL
+
+  // Init saat halaman siap
+  document.addEventListener('DOMContentLoaded', () => {
+    renderRingkas()
+    renderChart()
+    loadPengumuman()
+  })
+</script>
+
+<!-- ========================
+PETUNJUK INTEGRASI GOOGLE APPS SCRIPT (UPLOAD -> DRIVE + TULIS -> SHEET)
+========================= -->
+<!--
+1) Buat Google Apps Script (script.new) dan tempel kode berikut:
+
+const FOLDER_ID = '1oJuV9q-O_AmuDK-nvZ4ahEWg6AEFAWTa'; // Folder master di Drive (dari Anda)
+const SHEET_ID  = '1e0ObTh7qr7DKTwFsAfRYeNRJ9qkDkZ1Lhg1CEusnwEo'; // Spreadsheet SIDALI_Kegiatan
+
+function doPost(e){
+  try{
+    const data = e.parameter
+    const nama = data.nama
+    const tanggal = data.tanggal
+    const kec = data.kecamatan
+    const desk = data.deskripsi
+
+    let lampiranUrl = ''
+    // Tangani file (multipart/form-data)
+    if(e?.files && e.files.lampiran){
+      const f = e.files.lampiran
+      const folder = DriveApp.getFolderById(FOLDER_ID)
+      const blob = Utilities.newBlob(f.bytes, f.mimeType, f.filename)
+      const file = folder.createFile(blob)
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW)
+      lampiranUrl = file.getUrl()
+    }
+
+    const ss = SpreadsheetApp.openById(SHEET_ID)
+    const sh = ss.getSheets()[0]
+    sh.appendRow([tanggal, kec, nama, desk, lampiranUrl, new Date()])
+
+    return ContentService.createTextOutput(JSON.stringify({ok:true}))
+      .setMimeType(ContentService.MimeType.JSON)
+  }catch(err){
+    return ContentService.createTextOutput(JSON.stringify({ok:false, message: String(err)}))
+      .setMimeType(ContentService.MimeType.JSON)
+  }
+}
+
+// Deploy > New Deployment > type: Web app
+//   Execute as: Me (Your account)
+//   Who has access: Anyone (anonymous)
+// Salin URL Web App dan tempel ke CONFIG.GAS_ENDPOINT di HTML ini.
+
+2) Publikasikan Sheet SIDALI_Kegiatan sebagai CSV agar tabel Pengumuman dinamis:
+   File -> Share -> Publish to web -> pilih Sheet yang berisi data -> format CSV -> Copy URL -> taruh ke CONFIG.SHEET_CSV_URL
+
+3) (Opsional) Simpan logo ke /assets/logo.png di repo agar stabil. Saat itu, ubah src img header menjadi '/assets/logo.png'.
+
+4) Hosting di GitHub Pages:
+   - Buat repo, tambah file ini sebagai index.html
+   - Settings -> Pages -> Deploy from branch -> pilih main, root
+   - Tunggu hingga URL GitHub Pages aktif
+
+5) Palet warna: Putih (#fff), Emas (var(--emas)), Hijau (var(--hijau)).
+-->
+</body>
+</html>
