@@ -232,16 +232,15 @@
   // ======================
  const CONFIG = {
     // 1) Endpoint Google Apps Script (Web App) untuk menerima POST multipart/form-data
-    GAS_ENDPOINT: 'https://script.google.com/macros/library/d/13C8Tjm1PdG74oMyVy-nZQqsx3-U7tpxZPX9zySxrw_cXN1sR-nq2Dzdr/2',
+    GAS_ENDPOINT: 'https://script.google.com/macros/s/AKfycbyRwGmkqI32GZEdUSDxzrNSTM57p8GOSCqqpIf4QWlRdiAUIWjb4wFhqHTwQXt2y5D1/exec',
 
     // 2) Sheet Pengumuman (hasil unggahan) dalam format CSV yang dipublish to web
-    //    Spreadsheet: https://docs.google.com/spreadsheets/d/1dVejLEpBx_ypeKR6o3F26ebX-jKRwPRZhNV2KOXW2V8/edit
     SHEET_CSV_URL: 'https://docs.google.com/spreadsheets/d/1dVejLEpBx_ypeKR6o3F26ebX-jKRwPRZhNV2KOXW2V8/export?format=csv&gid=0',
 
     // 3) URL embed Sheet Pengumuman (fallback tampilan langsung Sheet)
     PENGUMUMAN_EMBED_URL: 'https://docs.google.com/spreadsheets/d/1dVejLEpBx_ypeKR6o3F26ebX-jKRwPRZhNV2KOXW2V8/preview',
 
-    // 4) Data Deskripsi Wilayah (boleh kamu sesuaikan dengan data resmi)
+    // 4) Data Deskripsi Wilayah
     DESKRIPSI: {
       luas_km2: 6030.47,
       penduduk: 310000,
@@ -250,7 +249,7 @@
       catatan: 'Angka indikatif — mohon sesuaikan dengan data resmi BPS/Daerah.'
     },
 
-    // 5) Data grafik penduduk (contoh; bisa diubah jika ada data BPS)
+    // 5) Data grafik penduduk
     GRAFIK_PENDUDUK: {
       labels: ['2019','2020','2021','2022','2023','2024'],
       values: [298000, 302000, 305500, 307800, 309200, 310000]
